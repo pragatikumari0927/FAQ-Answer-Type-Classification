@@ -1,0 +1,20 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt ruff
+      - run: ruff check --select E9,F63,F7,F82 .  # syntax and undefined-name errors only; widen once existing lint is cleaned up
+      # No tests exist yet; at minimum confirm every module compiles.
+      - run: python -m compileall -q .
