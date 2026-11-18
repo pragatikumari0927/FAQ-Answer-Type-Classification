@@ -1,0 +1,48 @@
+name: models
+
+# Trains the models from the committed labeled data.
+# - Pull requests: train and upload the .pkl files as a build artifact (verification only).
+# - Tags matching models-v*: train and attach the .pkl files to a GitHub Release.
+
+on:
+  pull_request:
+  push:
+    tags: ["models-v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: python -m nltk.downloader vader_lexicon
+      - name: Train
+        run: python backend/train.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: models
+          path: backend/models/*.pkl
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/models-v')
+    needs: train
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          name: models
+          path: models
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" models/*.pkl -R "$GITHUB_REPOSITORY" --title "Models $GITHUB_REF_NAME" --notes "Trained model files for the dashboard. Download into backend/models/."

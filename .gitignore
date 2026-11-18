@@ -25,3 +25,6 @@ Thumbs.db
 
 # Raw source dump (large, regenerate with backend/data_ingestion.py)
 data/raw/
+
+# Trained models: published as GitHub Release assets, not committed
+backend/models/*.pkl
