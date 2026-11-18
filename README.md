@@ -65,8 +65,21 @@ cd frontend
 streamlit run app.py
 ```
 
-Models are already trained and included in `backend/models/`, so the app
-runs immediately — no retraining needed.
+The trained models aren't committed to git. Before running the app, either
+download them from the latest `models-v*` release into `backend/models/`:
+
+```bash
+gh release download --pattern '*.pkl' --dir backend/models \
+  -R pragatikumari0927/FAQ-Answer-Type-Classification
+```
+
+or train them locally (takes a few seconds):
+
+```bash
+pip install -r requirements.txt
+python -m nltk.downloader vader_lexicon
+python backend/train.py
+```
 
 The dashboard has five pages:
 - **Overview & EDA** — class distributions, sentiment/tone breakdown, word clouds
